@@ -34,7 +34,8 @@ The CLI currently supports the following commands:
 Test your Bedrock connection with a simple completion using Claude 3 Sonnet:
 
 ```bash
-./bin/bedrock-demo hello
+❯ ./bin/bedrock-demo hello
+Greetings, terrestrial orb of diverse life forms!
 ```
 
 This command will:
