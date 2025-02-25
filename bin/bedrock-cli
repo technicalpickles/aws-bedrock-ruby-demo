@@ -8,7 +8,7 @@ require 'json'
 class BedrockCLI < Thor
   desc "hello", "Test Bedrock connection with a simple completion"
   def hello
-    client = Aws::BedrockRuntime::Client.new(region: 'us-west-2')
+    client = Aws::BedrockRuntime::Client.new
     
     # Using Claude model
     request = {
