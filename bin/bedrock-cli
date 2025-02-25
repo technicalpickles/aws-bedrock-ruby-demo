@@ -3,13 +3,18 @@
 require 'bundler/setup'
 require 'thor'
 require 'aws-sdk-bedrockruntime'
+require 'aws-sdk-bedrock'
 require 'json'
 
-class BedrockCLI < Thor
+class BedrockDemoCLI < Thor
+
   desc "hello", "Test Bedrock connection with a simple completion"
   def hello
+    unless ensure_sso_session
+      exit 1
+    end
+
     client = Aws::BedrockRuntime::Client.new
-    
     # Using Claude model
     request = {
       model_id: "anthropic.claude-3-sonnet-20240229-v1:0",
@@ -21,7 +26,7 @@ class BedrockCLI < Thor
         messages: [
           {
             role: "user",
-            content: "Say hello world!"
+            content: "Say something along the lines of 'hello, world!', but make it weird and interesting. Just say it, without any preamble or explanation."
           }
         ]
       }.to_json
@@ -40,6 +45,23 @@ class BedrockCLI < Thor
       puts "Error: #{e.message}"
     end
   end
+  private
+
+  def ensure_sso_session
+    # Use the base Bedrock client for validation since BedrockRuntime doesn't have list operations
+    Aws::Bedrock::Client.new.list_foundation_models
+    true
+  rescue Aws::Errors::InvalidSSOCredentials
+    puts "SSO session expired. Running aws sso login..."
+    system('aws sso login')
+    if $?.success?
+      puts "SSO login successful, retrying operation..."
+      true
+    else
+      puts "SSO login failed. Please run 'aws sso login' manually and try again."
+      false
+    end
+  end
 end
 
-BedrockCLI.start(ARGV) 
+BedrockDemoCLI.start(ARGV) 
